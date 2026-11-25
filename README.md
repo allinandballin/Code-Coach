@@ -1,8 +1,8 @@
 # Code Coach
 
-Code Coach is an AI-assisted coding tutor for beginners. Lessons explain what code does, why it is useful, and when to use it, then check understanding with guided questions, retry hints, planning activities, reflection, and delayed recall.
+Code Coach is an AI-assisted coding tutor for beginners. Each language has a three-lesson starter path that explains what code does, why it is useful, and when to use it. Comprehension checks, retry hints, planning activities, reflection, and delayed recall help learners build understanding step by step.
 
-Learners can choose Python, C++, C#, Java, JavaScript, or Solidity. The prototype includes a runnable Python `print()` playground; examples in the other languages are read-only. Solidity lessons are educational and do not deploy contracts.
+Learners can choose Python, C++, C#, Java, JavaScript, or Solidity. Each starter path moves from output, to variables, to decisions or comparisons, with progress saved separately for each language. The prototype includes a runnable Python `print()` playground; examples in the other languages are read-only. Solidity lessons are educational and do not deploy contracts.
 
 ## Run locally
 

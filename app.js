@@ -8,6 +8,8 @@ const startingState = {
   reviewComplete: false,
   reviewLanguage: 'python',
   languagesCompleted: [],
+  completedLessons: {},
+  currentLessons: {},
   reflection: '',
   lastVisit: null,
 };
@@ -102,11 +104,64 @@ const lessons = {
     runnable: false, review: 'What does public let other code do?', reviewAnswer: 'Read the value of the variable.',
   },
 };
+
+const followUp = (stage) => ({
+  ...stage,
+  name: stage.language,
+  answers: [stage.right, ...stage.wrong],
+  correct: 0,
+  editorHint: `${stage.language} code examples are read-only in this prototype.`,
+  runnable: false,
+  review: stage.check,
+  reviewAnswer: stage.right,
+});
+
+const followUpLessons = {
+  python: [
+    followUp({ language: 'Python', title: 'Give a value a name', focus: 'store information in a variable', intro: 'A variable is a name a program uses to remember information. Here, score remembers the number 3.', code: 'score = 3\nprint(score)', what: 'The equals sign stores 3 in the variable named score. The next line shows the value.', why: 'A named value is easier to reuse than typing the same information everywhere.', when: 'Use a variable for a score, a player name, or a number that can change.', practiceTitle: 'Store a game score', practiceInstruction: 'Read the code and find the name that holds the number 3.', check: 'What is score doing in this example?', right: 'It is a variable that remembers the value 3.', wrong: ['It is a command that ends the program.', 'It is the name of the Python language.'], hint: 'Look at the left side of the equals sign. That is the name receiving the value.', correctFeedback: 'Exactly. score is a variable, and it currently remembers 3.', wrongFeedback: 'Not quite. The value is placed into a named spot so the program can use it later.' }),
+    followUp({ language: 'Python', title: 'Teach the program to choose', focus: 'make a choice with an if statement', intro: 'Programs can check whether something is true, then choose what to do. This game checks whether the score is high enough to win.', code: 'score = 10\nif score >= 10:\n    print("You win!")', what: 'if checks the condition. The indented instruction runs only when the condition is true.', why: 'Choices let games react differently to what the player does.', when: 'Use if to check for a match, a winning score, or an answer that is correct.', practiceTitle: 'Find the choice in the game', practiceInstruction: 'Read the condition and decide when the win message appears.', check: 'When will the indented message show?', right: 'When score is 10 or greater.', wrong: ['Every time, no matter what score is stored.', 'Only when score is less than 10.'], hint: 'The symbol >= means greater than or equal to.', correctFeedback: 'Right. The program checks the score before showing the win message.', wrongFeedback: 'Not quite. Read the comparison after if: it sets the condition that must be true.' }),
+  ],
+  cpp: [
+    followUp({ language: 'C++', title: 'Give a value a name', focus: 'store information in a variable', intro: 'A variable is a named place to remember information. In C++, int tells us score will store a whole number.', code: 'int score = 3;\nstd::cout << score << std::endl;', what: 'The first line creates score and stores 3 in it. The second line displays the value.', why: 'A named value can be reused and changed as a program runs.', when: 'Use variables for a score, a number of tries, or a player name.', practiceTitle: 'Store a game score', practiceInstruction: 'Find the variable that remembers the number 3.', check: 'What does int score = 3; do?', right: 'It creates a whole-number variable named score and stores 3.', wrong: ['It prints the number three times.', 'It tells C++ to stop running.'], hint: 'int is the kind of value, score is its name, and 3 is what it remembers.', correctFeedback: 'Exactly. score is a whole-number variable that currently stores 3.', wrongFeedback: 'Not quite. Read the line in three parts: the type, the name, and the value.' }),
+    followUp({ language: 'C++', title: 'Teach the program to choose', focus: 'make a choice with an if statement', intro: 'An if statement checks a condition. This game shows a win message only when the score reaches 10.', code: 'int score = 10;\nif (score >= 10) {\n    std::cout << "You win!" << std::endl;\n}', what: 'The condition inside parentheses is checked. Braces hold the instruction that runs if it is true.', why: 'Choices let a program respond to different scores or player actions.', when: 'Use if to check whether a player won or two game blocks match.', practiceTitle: 'Find the choice in the game', practiceInstruction: 'Read the condition and decide when the message appears.', check: 'When will the message inside the braces appear?', right: 'When score is 10 or greater.', wrong: ['Every time the program starts.', 'Only when score is less than 10.'], hint: 'The symbol >= means greater than or equal to.', correctFeedback: 'Right. The if statement checks the score before showing the message.', wrongFeedback: 'Not quite. The condition inside parentheses controls whether the code in braces runs.' }),
+  ],
+  csharp: [
+    followUp({ language: 'C#', title: 'Give a value a name', focus: 'store information in a variable', intro: 'A variable gives a name to information the program should remember. int means score will hold a whole number.', code: 'int score = 3;\nConsole.WriteLine(score);', what: 'The first line creates score and stores 3. The second line displays the value.', why: 'Variables let programs reuse and update information while they run.', when: 'Use variables for scores, names, or the number of tries left.', practiceTitle: 'Store a game score', practiceInstruction: 'Find the name that remembers the number 3.', check: 'What does int score = 3; do?', right: 'It creates a whole-number variable named score and stores 3.', wrong: ['It displays three messages.', 'It ends the C# program.'], hint: 'int is the kind of value, score is its name, and 3 is the value.', correctFeedback: 'Exactly. score is a whole-number variable that currently stores 3.', wrongFeedback: 'Not quite. Break the line into its type, name, and starting value.' }),
+    followUp({ language: 'C#', title: 'Teach the program to choose', focus: 'make a choice with an if statement', intro: 'An if statement checks a condition. This game shows a message only when the score reaches 10.', code: 'int score = 10;\nif (score >= 10)\n{\n    Console.WriteLine("You win!");\n}', what: 'The condition inside parentheses is checked. The braces hold what happens if it is true.', why: 'Choices let a program respond to a score or a player action.', when: 'Use if to check for a win, a correct answer, or a matching pair.', practiceTitle: 'Find the choice in the game', practiceInstruction: 'Read the condition and decide when the message appears.', check: 'When will the message inside the braces appear?', right: 'When score is 10 or greater.', wrong: ['Every time, regardless of the score.', 'Only when score is less than 10.'], hint: 'The symbol >= means greater than or equal to.', correctFeedback: 'Right. The if statement checks the score before showing the message.', wrongFeedback: 'Not quite. The condition in parentheses decides if the braced code runs.' }),
+  ],
+  java: [
+    followUp({ language: 'Java', title: 'Give a value a name', focus: 'store information in a variable', intro: 'A variable is a named place to remember information. int tells Java that score will store a whole number.', code: 'int score = 3;\nSystem.out.println(score);', what: 'The first line creates score and stores 3. The second line displays its value.', why: 'Variables let a program reuse and update information as it runs.', when: 'Use variables for a score, a player name, or the number of turns left.', practiceTitle: 'Store a game score', practiceInstruction: 'Find the name that remembers the number 3.', check: 'What does int score = 3; do?', right: 'It creates a whole-number variable named score and stores 3.', wrong: ['It prints the number three times.', 'It shuts down the program.'], hint: 'int is the type, score is the variable name, and 3 is its starting value.', correctFeedback: 'Exactly. score is a whole-number variable that currently stores 3.', wrongFeedback: 'Not quite. Read the line from left to right: type, name, then value.' }),
+    followUp({ language: 'Java', title: 'Teach the program to choose', focus: 'make a choice with an if statement', intro: 'An if statement checks a condition. The game shows a win message when the score is at least 10.', code: 'int score = 10;\nif (score >= 10) {\n    System.out.println("You win!");\n}', what: 'The condition in parentheses is checked. Braces hold the instruction that runs if it is true.', why: 'Choices let programs respond to different scores and player actions.', when: 'Use if to check if a player won or gave a correct answer.', practiceTitle: 'Find the choice in the game', practiceInstruction: 'Read the condition and decide when the message appears.', check: 'When will the message inside the braces appear?', right: 'When score is 10 or greater.', wrong: ['Every time the program starts.', 'Only when score is less than 10.'], hint: 'The symbol >= means greater than or equal to.', correctFeedback: 'Right. The if statement checks the score before showing the message.', wrongFeedback: 'Not quite. The condition inside parentheses controls whether the code in braces runs.' }),
+  ],
+  javascript: [
+    followUp({ language: 'JavaScript', title: 'Give a value a name', focus: 'store information in a variable', intro: 'A variable is a name the program uses to remember information. Here, score remembers the number 3.', code: 'let score = 3;\nconsole.log(score);', what: 'let creates a variable named score and stores 3. The next line shows the value in the console.', why: 'Variables make it easy to reuse or change information in an interactive page.', when: 'Use variables for a score, a player name, or a button choice.', practiceTitle: 'Store a game score', practiceInstruction: 'Find the name that remembers the number 3.', check: 'What does let score = 3; do?', right: 'It creates a variable named score and stores 3.', wrong: ['It makes the browser show three web pages.', 'It removes the score from the program.'], hint: 'let introduces a variable, score is its name, and 3 is the value.', correctFeedback: 'Exactly. score is a variable that currently remembers 3.', wrongFeedback: 'Not quite. Look at the name between let and the equals sign.' }),
+    followUp({ language: 'JavaScript', title: 'Teach the program to choose', focus: 'make a choice with an if statement', intro: 'An if statement checks a condition. This game shows a message only when the score reaches 10.', code: 'let score = 10;\nif (score >= 10) {\n  console.log("You win!");\n}', what: 'The condition inside parentheses is checked. Braces hold what happens if it is true.', why: 'Choices let a website react to clicks, scores, and answers.', when: 'Use if to check for a win, a correct answer, or a matching pair.', practiceTitle: 'Find the choice in the game', practiceInstruction: 'Read the condition and decide when the message appears.', check: 'When will the message inside the braces appear?', right: 'When score is 10 or greater.', wrong: ['Every time the page opens.', 'Only when score is less than 10.'], hint: 'The symbol >= means greater than or equal to.', correctFeedback: 'Right. The if statement checks the score before showing the message.', wrongFeedback: 'Not quite. The condition in parentheses decides whether the code inside braces runs.' }),
+  ],
+  solidity: [
+    followUp({ language: 'Solidity', title: 'Store information in contract state', focus: 'store information in a state variable', intro: 'A state variable lets a smart contract remember information between transactions. This example stores a game score.', code: 'uint public score = 3;', what: 'uint is a whole number, score is its name, and public lets outside code read it.', why: 'Contracts need stored state to remember things like scores or game settings.', when: 'Use a state variable when contract data should remain saved on the blockchain.', practiceTitle: 'Find the saved game score', practiceInstruction: 'Read the declaration and identify the name of the stored value.', check: 'What information is stored in score?', right: 'The whole number 3.', wrong: ['The text "score" as a message.', 'A command to send 3 coins.'], hint: 'Look to the right of the equals sign for the value.', correctFeedback: 'Correct. The contract stores the whole number 3 in score.', wrongFeedback: 'Not quite. This declaration stores data; it does not display a message or send money.' }),
+    followUp({ language: 'Solidity', title: 'Check whether two blocks match', focus: 'compare values in a smart contract', intro: 'A matching-block game needs to compare two hidden values. This function returns true when both values are the same.', code: 'function isMatch(uint first, uint second) public pure returns (bool) {\n    return first == second;\n}', what: 'The == symbol checks whether the two values are equal. The function returns the answer as true or false.', why: 'A contract can use comparisons to decide whether game actions follow the rules.', when: 'Use a comparison when a game needs to check for a match or a winning condition.', practiceTitle: 'Find the matching check', practiceInstruction: 'Read the comparison and decide what makes the function return true.', check: 'When does first == second return true?', right: 'When first and second have the same value.', wrong: ['Whenever either value is zero.', 'When the two values are different.'], hint: 'Two equals signs compare values; one equals sign stores a value.', correctFeedback: 'Exactly. == asks whether the two values are equal.', wrongFeedback: 'Not quite. The function compares the two inputs and returns true only when they match.' }),
+  ],
+};
+
+const courses = Object.fromEntries(Object.keys(lessons).map((language) => [language, [lessons[language], ...followUpLessons[language]]]));
+
 let selectedLanguage = localStorage.getItem('code-coach-language') || 'python';
 if (!lessons[selectedLanguage]) selectedLanguage = 'python';
 state.languagesCompleted = Array.isArray(state.languagesCompleted) ? state.languagesCompleted : [];
+state.completedLessons = state.completedLessons && typeof state.completedLessons === 'object' ? state.completedLessons : {};
+state.currentLessons = state.currentLessons && typeof state.currentLessons === 'object' ? state.currentLessons : {};
+state.languagesCompleted.forEach((language) => { state.completedLessons[language] = Math.max(state.completedLessons[language] || 0, 1); });
 state.reviewLanguage = state.reviewLanguage || 'python';
 let mainAnswered = false;
+
+function getCurrentLesson() {
+  const index = Math.min(state.currentLessons[selectedLanguage] || 0, courses[selectedLanguage].length - 1);
+  return courses[selectedLanguage][index];
+}
+
+function getCurrentLessonIndex() {
+  return Math.min(state.currentLessons[selectedLanguage] || 0, courses[selectedLanguage].length - 1);
+}
 
 function readState() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
@@ -119,7 +174,8 @@ function saveState() {
 }
 
 function renderProgress() {
-  $('#progress-count').textContent = `${state.languagesCompleted.length} of ${Object.keys(lessons).length}`;
+  const completed = Object.values(state.completedLessons).reduce((total, count) => total + Math.min(Number(count) || 0, 3), 0);
+  $('#progress-count').textContent = `${completed} of ${Object.keys(lessons).length * 3}`;
   const reflection = $('#reflection');
   if (reflection && !reflection.value) reflection.value = state.reflection || '';
 }
@@ -134,11 +190,12 @@ function showView(viewName) {
 function getActiveTopic() {
   return $('.nav-button.active')?.dataset.view === 'design'
     ? 'planning a matching-blocks game'
-    : `Learn ${lessons[selectedLanguage].name}: ${lessons[selectedLanguage].focus}`;
+    : `Lesson ${getCurrentLessonIndex() + 1}: Learn ${getCurrentLesson().name}: ${getCurrentLesson().focus}`;
 }
 
 function renderLanguage() {
-  const lesson = lessons[selectedLanguage];
+  const lesson = getCurrentLesson();
+  const lessonIndex = getCurrentLessonIndex();
   $$('.language-card').forEach((button) => {
     const selected = button.dataset.language === selectedLanguage;
     button.classList.toggle('selected', selected);
@@ -155,7 +212,9 @@ function renderLanguage() {
   $('#editor-hint').textContent = lesson.editorHint;
   $('#check-question').textContent = lesson.check;
   $('#coach-message').placeholder = `I think ${lesson.focus} means...`;
-  $( '.nav-button[data-view="lesson"]' ).textContent = 'Lesson 1 - ' + lessons[selectedLanguage].name;
+  $('#nav-lesson-number').textContent = String(lessonIndex + 1);
+  $('#nav-lesson-name').textContent = lesson.focus;
+  $('#lesson-stage').textContent = `LESSON ${lessonIndex + 1} OF ${courses[selectedLanguage].length} · ${lesson.name.toUpperCase()}`;
   $('#code-input').value = lesson.code;
   $('#code-input').readOnly = !lesson.runnable;
   $('#run-code').hidden = !lesson.runnable;
@@ -168,7 +227,9 @@ function renderLanguage() {
     $('.try-section').append(runnerNote);
   }
   runnerNote.hidden = lesson.runnable;
-  runnerNote.textContent = `${lesson.name} examples are read-only in this prototype. Their language-specific coding runners will be added as those courses are built.`;
+  runnerNote.textContent = selectedLanguage === 'python'
+    ? 'This Python example is read-only in this lesson. The runnable Python playground is in Lesson 1.'
+    : `${lesson.name} examples are read-only in this prototype. A coding runner for this language will be added later.`;
   $('#code-output').textContent = lesson.sampleOutput || 'This code example is for reading and understanding.';
   $('#run-feedback').textContent = '';
 
@@ -181,7 +242,24 @@ function renderLanguage() {
   });
   $('#answer-feedback').hidden = true;
   $('#answer-feedback').textContent = '';
-  mainAnswered = false;
+  const lessonComplete = (state.completedLessons[selectedLanguage] || 0) > lessonIndex;
+  mainAnswered = lessonComplete;
+  $('#lesson-continue').hidden = !lessonComplete;
+  if (lessonComplete) {
+    const lastLesson = lessonIndex === courses[selectedLanguage].length - 1;
+    $('#continue-note').textContent = lastLesson
+      ? `You completed the ${courses[selectedLanguage].length}-lesson starter path. Try another practice problem or review a lesson.`
+      : 'You got it! The next lesson is ready when you are.';
+    $('#continue-lesson').textContent = lastLesson ? 'Review Lesson 1' : `Continue to Lesson ${lessonIndex + 2}`;
+    const correctButton = answers.find((button) => button.dataset.answer === 'correct');
+    correctButton?.classList.add('correct');
+    $('#answer-feedback').hidden = false;
+    $('#answer-feedback').className = 'answer-feedback good';
+    $('#answer-feedback').textContent = lesson.correctFeedback;
+  } else {
+    $('#lesson-continue').hidden = true;
+  }
+  answers.forEach((button) => { button.disabled = lessonComplete; });
   if ($('#review-card')) $('#review-card').remove();
   if (state.reviewDue && !state.reviewComplete && state.reviewLanguage === selectedLanguage) showReview();
 }
@@ -255,7 +333,7 @@ async function requestFeedback({ message, responseTarget, button }) {
 
 function showReview() {
   if ($('#review-card')) return;
-  const lesson = lessons[selectedLanguage];
+  const lesson = getCurrentLesson();
   const review = document.createElement('div');
   review.className = 'review-card';
   review.id = 'review-card';
@@ -304,7 +382,7 @@ $$('.language-card').forEach((button) => button.addEventListener('click', () => 
 
 $('#copy-example').addEventListener('click', async (event) => {
   try {
-    await navigator.clipboard.writeText(lessons[selectedLanguage].code);
+    await navigator.clipboard.writeText(getCurrentLesson().code);
     event.currentTarget.textContent = 'Copied!';
     setTimeout(() => { event.currentTarget.textContent = 'Copy'; }, 1300);
   } catch {
@@ -341,16 +419,24 @@ const mainQuestion = $('#comprehension');
 $$('.answer-option', mainQuestion).forEach((button) => button.addEventListener('click', () => {
   if (mainAnswered) return;
   const feedback = $('#answer-feedback');
-  const lesson = lessons[selectedLanguage];
+  const lesson = getCurrentLesson();
   if (button.dataset.answer === 'correct') {
     button.classList.add('correct');
     feedback.hidden = false;
     feedback.className = 'answer-feedback good';
     feedback.textContent = lesson.correctFeedback;
     mainAnswered = true;
-    if (!state.languagesCompleted.includes(selectedLanguage)) state.languagesCompleted.push(selectedLanguage);
-    if (selectedLanguage === 'python') state.comprehensionComplete = true;
+    const lessonIndex = getCurrentLessonIndex();
+    state.completedLessons[selectedLanguage] = Math.max(state.completedLessons[selectedLanguage] || 0, lessonIndex + 1);
+    if (selectedLanguage === 'python' && lessonIndex === 0) state.comprehensionComplete = true;
     saveState();
+    $('#continue-note').textContent = lessonIndex === courses[selectedLanguage].length - 1
+      ? `You completed the ${courses[selectedLanguage].length}-lesson starter path. Try another practice problem or review a lesson.`
+      : 'You got it! The next lesson is ready when you are.';
+    $('#continue-lesson').textContent = lessonIndex === courses[selectedLanguage].length - 1
+      ? 'Review Lesson 1'
+      : `Continue to Lesson ${lessonIndex + 2}`;
+    $('#lesson-continue').hidden = false;
     $$('.answer-option', mainQuestion).forEach((option) => { option.disabled = true; });
   } else {
     button.classList.add('incorrect');
@@ -365,7 +451,21 @@ $('#show-hint').addEventListener('click', () => {
   const feedback = $('#answer-feedback');
   feedback.hidden = false;
   feedback.className = 'answer-feedback';
-  feedback.textContent = `Hint: ${lessons[selectedLanguage].hint}`;
+  feedback.textContent = `Hint: ${getCurrentLesson().hint}`;
+});
+
+$('#continue-lesson').addEventListener('click', () => {
+  const currentIndex = getCurrentLessonIndex();
+  if (currentIndex >= courses[selectedLanguage].length - 1) {
+    state.currentLessons[selectedLanguage] = 0;
+  } else {
+    state.currentLessons[selectedLanguage] = currentIndex + 1;
+  }
+  state.reviewDue = false;
+  state.reviewComplete = false;
+  saveState();
+  renderLanguage();
+  $('.lesson-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 function connectDesignQuestion(questionId, correctAnswer, feedbackId, nextQuestionId, completionKey, explanation) {
