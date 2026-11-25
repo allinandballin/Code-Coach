@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f7fb" />
+    <title>Code Coach — Learn the why</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="Code Coach home">
+        <span class="brand-mark">{ }</span>
+        <span>Code Coach</span>
+      </a>
+      <div class="topbar-right">
+        <span class="saved-status"><span class="status-dot"></span> Progress saved on this device</span>
+        <button class="avatar" aria-label="Learner profile">J</button>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section class="welcome-row" id="home">
+        <div>
+          <p class="eyebrow">YOUR CODING JOURNEY</p>
+          <h1>Learn what code means.</h1>
+          <p class="welcome-copy">Small steps. Clear explanations. You do the thinking.</p>
+        </div>
+        <div class="streak-card"><span class="streak-icon">✦</span><div><strong id="progress-count">0 of 6</strong><span>languages explored</span></div></div>
+      </section>
+
+      <section class="language-picker" aria-labelledby="language-title">
+        <div class="picker-heading"><div><p class="eyebrow">CHOOSE A COURSE</p><h2 id="language-title">What do you want to learn?</h2></div><span class="picker-note">Start with one. Explore them all.</span></div>
+        <div class="language-grid" role="group" aria-label="Select a programming language">
+          <button class="language-card selected" data-language="python" type="button"><span class="language-icon python">Py</span><span><strong>Learn Python</strong><small>Beginner friendly</small></span><span class="selection-mark">✓</span></button>
+          <button class="language-card" data-language="cpp" type="button"><span class="language-icon cpp">C++</span><span><strong>Learn C++</strong><small>Build fast programs</small></span><span class="selection-mark">✓</span></button>
+          <button class="language-card" data-language="csharp" type="button"><span class="language-icon csharp">C#</span><span><strong>Learn C#</strong><small>Apps and games</small></span><span class="selection-mark">✓</span></button>
+          <button class="language-card" data-language="java" type="button"><span class="language-icon java">J</span><span><strong>Learn Java</strong><small>Apps and more</small></span><span class="selection-mark">✓</span></button>
+          <button class="language-card" data-language="javascript" type="button"><span class="language-icon javascript">JS</span><span><strong>Learn JavaScript</strong><small>Interactive websites</small></span><span class="selection-mark">✓</span></button>
+          <button class="language-card" data-language="solidity" type="button"><span class="language-icon solidity">S</span><span><strong>Learn Solidity</strong><small>Smart contracts</small></span><span class="selection-mark">✓</span></button>
+        </div>
+      </section>
+      <nav class="lesson-nav" aria-label="Learning activities">
+        <button class="nav-button active" data-view="lesson">Lesson 1 - <span id="nav-lesson-name">Show a message</span></button>
+        <button class="nav-button" data-view="design">Think like a game designer <span class="new-tag">TRY IT</span></button>
+      </nav>
+
+      <section class="view active" id="lesson-view">
+        <div class="lesson-grid">
+          <article class="card lesson-card">
+            <div class="lesson-heading"><span class="step-label">LESSON 1 · FIRST STEPS</span><span class="duration">5 min</span></div>
+            <h2 id="lesson-title">Teach the computer to say hello</h2>
+            <p class="lead" id="lesson-intro">A computer follows instructions. Today, you'll give it one simple instruction.</p>
+
+            <div class="code-example" aria-label="Example code"><span class="line-number">1</span><code id="lesson-code"><span class="code-fn">print</span>(<span class="code-string">"Hello!"</span>)</code><button id="copy-example" class="copy-button" type="button">Copy</button></div>
+
+            <div class="explain-grid">
+              <div class="explain-card"><span class="explain-icon blue">?</span><div><strong>What does it do?</strong><p id="lesson-what"><code>print</code> tells the computer to show words on the screen.</p></div></div>
+              <div class="explain-card"><span class="explain-icon purple">✦</span><div><strong>Why use it?</strong><p id="lesson-why">Programs use it to show messages or results to a person.</p></div></div>
+              <div class="explain-card"><span class="explain-icon green">↗</span><div><strong>When might you use it?</strong><p id="lesson-when">To welcome a player, show a score, or share a helpful message.</p></div></div>
+            </div>
+
+            <div class="try-section">
+              <div class="section-title-row"><div><span class="step-label">YOUR TURN</span><h3 id="practice-title">Make the computer greet you</h3></div><span class="try-badge">✦ Try it</span></div>
+              <p id="practice-instruction">Change the words between the quotation marks, then run your code.</p>
+              <label class="sr-only" for="code-input">Write a print statement</label>
+              <div class="editor-wrap"><div class="editor-gutter">1</div><textarea id="code-input" spellcheck="false" autocapitalize="off" autocomplete="off">print("Hello!")</textarea></div>
+              <div class="editor-actions"><span class="editor-hint" id="editor-hint">Tip: Keep the parentheses and quotation marks.</span><button class="primary-button" id="run-code" type="button"><span>▶</span> Run code</button></div>
+              <div class="output-panel" aria-live="polite"><div class="output-label"><span class="output-dot"></span> COMPUTER SAYS</div><pre id="code-output">Your message will appear here.</pre><p id="run-feedback" class="run-feedback"></p></div><p id="runner-note" class="runner-note" hidden></p><p id="runner-note" class="runner-note" hidden></p>
+            </div>
+
+            <div class="check-section" id="comprehension">
+              <div class="section-title-row"><div><span class="step-label">QUICK CHECK</span><h3 id="check-question">What does <code>print</code> do?</h3></div><span class="check-icon">✓</span></div>
+              <p>Choose the best answer. If you miss it, you’ll get a hint and another try.</p>
+              <div class="answer-list" role="group" aria-label="Choose what print does">
+                <button class="answer-option" data-choice="0" data-answer="store">It stores a secret message for later.</button>
+                <button class="answer-option" data-choice="1" data-answer="show">It shows information on the screen.</button>
+                <button class="answer-option" data-choice="2" data-answer="erase">It erases the program.</button>
+              </div>
+              <div class="answer-feedback" id="answer-feedback" aria-live="polite" hidden></div>
+              <button class="text-button" id="show-hint" type="button">Need a hint?</button>
+            </div>
+
+            <div class="ai-section">
+              <div class="section-title-row"><div><span class="step-label">YOUR AI COACH</span><h3>Explain it in your own words</h3></div><span class="ai-pill"><span class="ai-spark">✦</span> Powered by your API</span></div>
+              <p>Write what you think the code does or ask a question. Your coach will respond with an explanation and a next step.</p>
+              <label class="sr-only" for="coach-message">Your explanation or question</label>
+              <textarea id="coach-message" rows="3" maxlength="1200" placeholder="I think print tells the computer to…"></textarea>
+              <div class="ai-actions"><button class="primary-button" id="ask-coach" type="button">Ask my coach</button><button class="secondary-button" id="make-exercise" type="button">Make a new practice problem</button></div>
+              <div class="ai-response" id="ai-response" aria-live="polite" hidden></div>
+              <div class="generated-exercise" id="generated-exercise" aria-live="polite" hidden></div>
+            </div>
+          </article>
+
+          <aside class="side-column">
+            <article class="card coach-card"><div class="coach-icon">✦</div><div><span class="step-label">YOUR COACH</span><h3>Mistakes help you learn</h3><p>Try an answer, see what happened, and use a hint to make another attempt. You’re in charge of the code.</p></div></article>
+            <article class="card progress-card"><span class="step-label">YOUR LEARNING PATH</span><div class="path-item done"><span class="path-marker">1</span><div><strong>Give an instruction</strong><span>We’re learning this now</span></div></div><div class="path-line"></div><div class="path-item"><span class="path-marker">2</span><div><strong>Plan a matching game</strong><span>Use your ideas to plan code</span></div></div><div class="path-note">Next, you’ll plan before you code.</div></article>
+            <article class="card remember-card"><span class="remember-icon">↻</span><div><strong>We’ll ask again later</strong><p>When you come back, a quick review will help check what you remember.</p></div></article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="design-view">
+        <article class="card design-card">
+          <div class="lesson-heading"><span class="step-label">PLAN BEFORE YOU CODE · GAME DESIGN</span><span class="duration">Your ideas matter</span></div>
+          <h2>Let’s plan a matching-blocks game</h2>
+          <p class="lead">A good programmer thinks about what the game must do before deciding exactly how to code it.</p>
+          <div class="game-preview" aria-hidden="true"><div class="tile revealed">🐸</div><div class="tile hidden-tile">?</div><div class="tile hidden-tile">?</div><div class="tile revealed">🐸</div></div>
+          <div class="question-block" id="design-q1">
+            <div class="question-number">1</div><div class="question-content"><span class="step-label">FIRST, THINK ABOUT THE GOAL</span><h3>What should we decide before writing code?</h3><p>There can be several useful planning steps. Pick the one that should guide the rest.</p>
+              <div class="answer-list design-answers" role="group" aria-label="Choose the first planning step">
+                <button class="answer-option" data-answer="colors">Choose the colors and sounds.</button>
+                <button class="answer-option" data-answer="rules">Decide the game rules and what counts as a match.</button>
+                <button class="answer-option" data-answer="score">Pick a final score number.</button>
+              </div>
+              <div class="answer-feedback" id="design-feedback-1" aria-live="polite" hidden></div>
+            </div>
+          </div>
+          <div class="question-block locked" id="design-q2" aria-disabled="true">
+            <div class="question-number">2</div><div class="question-content"><span class="step-label">NEXT, PLAN WHAT TO REMEMBER</span><h3>What information should the game remember about each block?</h3><p>Think about what the game needs to compare and whether a block is face up or face down.</p>
+              <div class="answer-list design-answers" role="group" aria-label="Choose the information each block needs">
+                <button class="answer-option" data-answer="shape">Only the block’s color.</button>
+                <button class="answer-option" data-answer="data">Its hidden picture or value, and whether it is showing.</button>
+                <button class="answer-option" data-answer="position">Only where it sits on the screen.</button>
+              </div>
+              <div class="answer-feedback" id="design-feedback-2" aria-live="polite" hidden></div>
+            </div>
+          </div>
+          <div class="reflection-box" id="reflection-box" hidden><span class="reflection-icon">✎</span><div><strong>Tell us how you’d organize the code</strong><p>There can be more than one good design. Explain your approach and why you chose it. Your coach will respond to your reasoning.</p><textarea id="reflection" rows="3" maxlength="1200" placeholder="I would organize the game by…"></textarea><button id="save-reflection" class="primary-button" type="button">Save my idea</button><button id="coach-reflection" class="secondary-button" type="button">Get feedback from my coach</button><span id="reflection-saved" class="saved-message" hidden>Your idea is saved on this device.</span><div class="ai-response" id="reflection-response" aria-live="polite" hidden></div></div></div>
+        </article>
+      </section>
+
+      <footer class="page-footer"><span>Code Coach</span><span>Every answer is a chance to understand more.</span></footer>
+    </main>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
