@@ -26,7 +26,7 @@
           <h1>Learn what code means.</h1>
           <p class="welcome-copy">Small steps. Clear explanations. You do the thinking.</p>
         </div>
-        <div class="streak-card"><span class="streak-icon">✦</span><div><strong id="progress-count">0 of 18</strong><span>starter lessons completed</span></div></div>
+        <div class="streak-card"><span class="streak-icon">✦</span><div><strong id="progress-count">0</strong><span>lessons completed</span></div></div>
       </section>
 
       <section class="language-picker" aria-labelledby="language-title">
@@ -81,17 +81,26 @@
               <button class="text-button" id="show-hint" type="button">Need a hint?</button>
             </div>
 
+            <div class="understanding-check" id="understanding-check" hidden>
+              <div class="section-title-row"><div><span class="step-label">SHOW WHAT YOU KNOW</span><h3>Explain it or show a code example</h3></div></div>
+              <p id="understanding-prompt">In your own words, explain what you learned. You can also write a small code example.</p>
+              <label class="sr-only" for="understanding-answer">Your explanation or code example</label>
+              <textarea id="understanding-answer" rows="4" maxlength="1200" placeholder="I learned that... or I would write..."></textarea>
+              <button class="primary-button" id="submit-understanding" type="button">Check my understanding</button>
+              <div class="ai-response" id="understanding-feedback" aria-live="polite" hidden></div>
+            </div>
+
             <div class="lesson-continue" id="lesson-continue" hidden>
               <p id="continue-note">You got it! Ready for the next idea?</p>
               <button class="primary-button" id="continue-lesson" type="button">Continue to Lesson 2</button>
             </div>
 
             <div class="ai-section">
-              <div class="section-title-row"><div><span class="step-label">YOUR AI COACH</span><h3>Explain it in your own words</h3></div><span class="ai-pill"><span class="ai-spark">✦</span> Powered by your API</span></div>
-              <p>Write what you think the code does or ask a question. Your coach will respond with an explanation and a next step.</p>
+              <div class="section-title-row"><div><span class="step-label">YOUR AI COACH</span><h3>Ask your AI coach a question</h3></div><span class="ai-pill"><span class="ai-spark">✦</span> Powered by your API</span></div>
+              <p>Use this box for extra help. To pass the lesson, submit your explanation or code in the "Show What You Know" section above.</p>
               <label class="sr-only" for="coach-message">Your explanation or question</label>
               <textarea id="coach-message" rows="3" maxlength="1200" placeholder="I think print tells the computer to…"></textarea>
-              <div class="ai-actions"><button class="primary-button" id="ask-coach" type="button">Ask my coach</button><button class="secondary-button" id="make-exercise" type="button">Make a new practice problem</button></div>
+              <div class="ai-actions"><button class="primary-button" id="ask-coach" type="button">Ask my coach</button><button class="secondary-button" id="make-exercise" type="button">Make extra practice</button></div>
               <div class="ai-response" id="ai-response" aria-live="polite" hidden></div>
               <div class="generated-exercise" id="generated-exercise" aria-live="polite" hidden></div>
             </div>

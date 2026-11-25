@@ -10,6 +10,8 @@ const startingState = {
   languagesCompleted: [],
   completedLessons: {},
   currentLessons: {},
+  quizPassed: {},
+  generatedLessons: {},
   reflection: '',
   lastVisit: null,
 };
@@ -150,7 +152,18 @@ if (!lessons[selectedLanguage]) selectedLanguage = 'python';
 state.languagesCompleted = Array.isArray(state.languagesCompleted) ? state.languagesCompleted : [];
 state.completedLessons = state.completedLessons && typeof state.completedLessons === 'object' ? state.completedLessons : {};
 state.currentLessons = state.currentLessons && typeof state.currentLessons === 'object' ? state.currentLessons : {};
+state.quizPassed = state.quizPassed && typeof state.quizPassed === 'object' ? state.quizPassed : {};
+state.generatedLessons = state.generatedLessons && typeof state.generatedLessons === 'object' ? state.generatedLessons : {};
 state.languagesCompleted.forEach((language) => { state.completedLessons[language] = Math.max(state.completedLessons[language] || 0, 1); });
+const languageNames = { python: 'Python', cpp: 'C++', csharp: 'C#', java: 'Java', javascript: 'JavaScript', solidity: 'Solidity' };
+for (const [language, savedLessons] of Object.entries(state.generatedLessons)) {
+  if (!courses[language] || !Array.isArray(savedLessons)) continue;
+  savedLessons.forEach((lesson) => {
+    if (lesson && typeof lesson.title === 'string' && typeof lesson.code === 'string' && Array.isArray(lesson.answers) && lesson.answers.length === 3) {
+      courses[language].push({ ...lesson, name: languageNames[language], runnable: false, review: lesson.check, reviewAnswer: lesson.answers[lesson.correct] });
+    }
+  });
+}
 state.reviewLanguage = state.reviewLanguage || 'python';
 let mainAnswered = false;
 
@@ -174,8 +187,8 @@ function saveState() {
 }
 
 function renderProgress() {
-  const completed = Object.values(state.completedLessons).reduce((total, count) => total + Math.min(Number(count) || 0, 3), 0);
-  $('#progress-count').textContent = `${completed} of ${Object.keys(lessons).length * 3}`;
+  const completed = Object.values(state.completedLessons).reduce((total, count) => total + (Number(count) || 0), 0);
+  $('#progress-count').textContent = String(completed);
   const reflection = $('#reflection');
   if (reflection && !reflection.value) reflection.value = state.reflection || '';
 }
@@ -243,14 +256,23 @@ function renderLanguage() {
   $('#answer-feedback').hidden = true;
   $('#answer-feedback').textContent = '';
   const lessonComplete = (state.completedLessons[selectedLanguage] || 0) > lessonIndex;
-  mainAnswered = lessonComplete;
+  const quizPassed = Boolean(state.quizPassed[`${selectedLanguage}:${lessonIndex}`]) || lessonComplete;
+  mainAnswered = quizPassed;
+  $('#understanding-check').hidden = !quizPassed || lessonComplete;
+  $('#understanding-answer').value = '';
+  $('#understanding-answer').disabled = false;
+  $('#submit-understanding').disabled = false;
+  $('#submit-understanding').textContent = 'Check my understanding';
+  $('#understanding-feedback').hidden = true;
+  $('#understanding-feedback').replaceChildren();
+  $('#understanding-prompt').textContent = `In your own words: ${lesson.check} You can also write a small ${lesson.name} code example that shows the same idea.`;
   $('#lesson-continue').hidden = !lessonComplete;
   if (lessonComplete) {
     const lastLesson = lessonIndex === courses[selectedLanguage].length - 1;
     $('#continue-note').textContent = lastLesson
-      ? `You completed the ${courses[selectedLanguage].length}-lesson starter path. Try another practice problem or review a lesson.`
+      ? `You finished Lesson ${lessonIndex + 1}. Your AI coach can build the next lesson in this course.`
       : 'You got it! The next lesson is ready when you are.';
-    $('#continue-lesson').textContent = lastLesson ? 'Review Lesson 1' : `Continue to Lesson ${lessonIndex + 2}`;
+    $('#continue-lesson').textContent = lastLesson ? `Create Lesson ${lessonIndex + 2} with AI` : `Continue to Lesson ${lessonIndex + 2}`;
     const correctButton = answers.find((button) => button.dataset.answer === 'correct');
     correctButton?.classList.add('correct');
     $('#answer-feedback').hidden = false;
@@ -259,7 +281,14 @@ function renderLanguage() {
   } else {
     $('#lesson-continue').hidden = true;
   }
-  answers.forEach((button) => { button.disabled = lessonComplete; });
+  if (quizPassed && !lessonComplete) {
+    const correctButton = answers.find((button) => button.dataset.answer === 'correct');
+    correctButton?.classList.add('correct');
+    $('#answer-feedback').hidden = false;
+    $('#answer-feedback').className = 'answer-feedback good';
+    $('#answer-feedback').textContent = lesson.correctFeedback;
+  }
+  answers.forEach((button) => { button.disabled = quizPassed; });
   if ($('#review-card')) $('#review-card').remove();
   if (state.reviewDue && !state.reviewComplete && state.reviewLanguage === selectedLanguage) showReview();
 }
@@ -427,16 +456,10 @@ $$('.answer-option', mainQuestion).forEach((button) => button.addEventListener('
     feedback.textContent = lesson.correctFeedback;
     mainAnswered = true;
     const lessonIndex = getCurrentLessonIndex();
-    state.completedLessons[selectedLanguage] = Math.max(state.completedLessons[selectedLanguage] || 0, lessonIndex + 1);
-    if (selectedLanguage === 'python' && lessonIndex === 0) state.comprehensionComplete = true;
+    state.quizPassed[`${selectedLanguage}:${lessonIndex}`] = true;
     saveState();
-    $('#continue-note').textContent = lessonIndex === courses[selectedLanguage].length - 1
-      ? `You completed the ${courses[selectedLanguage].length}-lesson starter path. Try another practice problem or review a lesson.`
-      : 'You got it! The next lesson is ready when you are.';
-    $('#continue-lesson').textContent = lessonIndex === courses[selectedLanguage].length - 1
-      ? 'Review Lesson 1'
-      : `Continue to Lesson ${lessonIndex + 2}`;
-    $('#lesson-continue').hidden = false;
+    $('#understanding-check').hidden = false;
+    $('#understanding-prompt').textContent = `In your own words: ${lesson.check} You can also write a small ${lesson.name} code example that shows the same idea.`;
     $$('.answer-option', mainQuestion).forEach((option) => { option.disabled = true; });
   } else {
     button.classList.add('incorrect');
@@ -454,13 +477,113 @@ $('#show-hint').addEventListener('click', () => {
   feedback.textContent = `Hint: ${getCurrentLesson().hint}`;
 });
 
-$('#continue-lesson').addEventListener('click', () => {
+$('#submit-understanding').addEventListener('click', async (event) => {
+  const button = event.currentTarget;
+  const responseTarget = $('#understanding-feedback');
+  const answer = $('#understanding-answer').value.trim();
+  if (!answer) {
+    responseTarget.hidden = false;
+    responseTarget.className = 'ai-response needs-work';
+    responseTarget.textContent = 'Write an explanation or a small code example first. Your coach will help you improve it.';
+    return;
+  }
+
+  const lesson = getCurrentLesson();
+  responseTarget.hidden = true;
+  setBusy(button, true, 'Checking your thinking.');
+  try {
+    const result = await callTutor({
+      action: 'feedback',
+      topic: lesson.focus,
+      language: selectedLanguage,
+      assessmentQuestion: lesson.check,
+      expectedIdea: lesson.reviewAnswer || lesson.answers[lesson.correct],
+      learnerMessage: answer,
+      code: answer.slice(0, 400),
+    });
+    showCoachFeedback(responseTarget, result);
+    if (result.outcome === 'correct') {
+      const lessonIndex = getCurrentLessonIndex();
+      state.completedLessons[selectedLanguage] = Math.max(state.completedLessons[selectedLanguage] || 0, lessonIndex + 1);
+      if (selectedLanguage === 'python' && lessonIndex === 0) state.comprehensionComplete = true;
+      saveState();
+      $('#understanding-answer').disabled = true;
+      button.disabled = true;
+      button.textContent = 'Understanding checked';
+      const lastLesson = lessonIndex === courses[selectedLanguage].length - 1;
+      $('#continue-note').textContent = lastLesson
+        ? `You finished Lesson ${lessonIndex + 1}. Your AI coach can build the next lesson in this course.`
+        : 'You showed what you understand. The next lesson is ready.';
+      $('#continue-lesson').textContent = lastLesson ? `Create Lesson ${lessonIndex + 2} with AI` : `Continue to Lesson ${lessonIndex + 2}`;
+      $('#lesson-continue').hidden = false;
+    }
+  } catch (error) {
+    responseTarget.hidden = false;
+    responseTarget.className = 'ai-response needs-work';
+    responseTarget.textContent = error.message;
+  } finally {
+    if (!state.completedLessons[selectedLanguage] || state.completedLessons[selectedLanguage] <= getCurrentLessonIndex()) {
+      setBusy(button, false);
+    }
+  }
+});
+
+async function createNextLesson(button) {
+  const language = selectedLanguage;
+  const currentIndex = getCurrentLessonIndex();
+  const course = courses[language];
+  const nextLessonNumber = course.length + 1;
+  const history = course.slice(-8).map(({ title, focus }) => ({ title, focus }));
+  setBusy(button, true, 'Creating your lesson.');
+  try {
+    const generated = await callTutor({
+      action: 'lesson',
+      language,
+      topic: getCurrentLesson().focus,
+      nextLessonNumber,
+      history,
+    });
+    const requiredText = ['title', 'focus', 'intro', 'code', 'what', 'why', 'when', 'practiceTitle', 'practiceInstruction', 'check', 'hint', 'correctFeedback', 'wrongFeedback'];
+    if (requiredText.some((field) => typeof generated[field] !== 'string' || !generated[field].trim())
+        || !Array.isArray(generated.answers) || generated.answers.length !== 3
+        || generated.answers.some((answer) => typeof answer !== 'string')
+        || !Number.isInteger(generated.correct) || generated.correct < 0 || generated.correct > 2) {
+      throw new Error('The AI lesson did not include a complete question. Please try again.');
+    }
+
+    const lesson = {
+      ...generated,
+      name: languageNames[language],
+      runnable: false,
+      review: generated.check,
+      reviewAnswer: generated.answers[generated.correct],
+      editorHint: `${languageNames[language]} code examples are read-only in this prototype.`,
+    };
+    if (!Array.isArray(state.generatedLessons[language])) state.generatedLessons[language] = [];
+    state.generatedLessons[language].push(lesson);
+    course.push(lesson);
+    state.currentLessons[language] = course.length - 1;
+    state.reviewDue = false;
+    state.reviewComplete = false;
+    state.quizPassed[`${language}:${currentIndex}`] = true;
+    saveState();
+    setBusy(button, false);
+    renderLanguage();
+    $('.lesson-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (error) {
+    setBusy(button, false);
+    $('#continue-note').textContent = error.message;
+  }
+}
+
+$('#continue-lesson').addEventListener('click', async (event) => {
+  const button = event.currentTarget;
   const currentIndex = getCurrentLessonIndex();
   if (currentIndex >= courses[selectedLanguage].length - 1) {
-    state.currentLessons[selectedLanguage] = 0;
-  } else {
-    state.currentLessons[selectedLanguage] = currentIndex + 1;
+    await createNextLesson(button);
+    return;
   }
+  state.currentLessons[selectedLanguage] = currentIndex + 1;
   state.reviewDue = false;
   state.reviewComplete = false;
   saveState();
